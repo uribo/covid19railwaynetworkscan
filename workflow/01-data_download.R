@@ -14,7 +14,7 @@ conflict_prefer("pluck", winner = "purrr")
 if (!dir.exists(here("data-raw/mlit_transport12")))
   dir.create(here("data-raw/mlit_transport12"), recursive = TRUE)
 if (!all.equal(list.files(here("data-raw/mlit_transport12/")),
-              c("001179095.xlsx", "001179688.xlsx"))) {
+              c("001179095.xlsx", "001179689.xlsx"))) {
   domain_url <- "https://www.mlit.go.jp"
   x <-
     read_html(str_glue("{domain_url}/sogoseisaku/transport/sosei_transport_tk_000035.html"))
@@ -30,7 +30,7 @@ if (!all.equal(list.files(here("data-raw/mlit_transport12/")),
         html_text(trim = TRUE)) %>%
     verify(nrow(.) == 24L)
   df_list %>%
-    filter(str_detect(title, "鉄道路線コード|線別駅間移動人員")) %>%
+    filter(str_detect(title, "鉄道駅コード|線別駅間移動人員")) %>%
     verify(nrow(.) == 2L) %>%
     pull(url) %>%
     walk(
