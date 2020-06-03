@@ -1,7 +1,7 @@
 source(here::here("workflow/02-railway_od.R"))
-library(sf)
 library(dplyr)
 library(scanstatistics)
+library(ssrn)
 drake::loadd(list = c("kanto_jr_adjacent_matrix", "kanto_jr_allpassernger_matrix"))
 plan_kanto4_hatunetu <-
   drake::drake_plan(
@@ -23,7 +23,7 @@ plan_kanto4_hatunetu <-
 plan_scanstats <- drake::drake_plan(
   # Create network window ---------------------------------------------------
   zones =
-    ssrn:::network_window(kanto_jr_adjacent_matrix,
+    network_window(kanto_jr_adjacent_matrix,
                           kanto_jr_allpassernger_matrix,
                           type = "connected_B",
                           cluster_max = 46),
