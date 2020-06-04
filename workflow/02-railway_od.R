@@ -10,6 +10,7 @@
 ####################################
 source(here::here("workflow/01-data_download.R"))
 library(sf)
+library(lwgeom)
 library(dplyr)
 library(stringr)
 library(here)
@@ -126,14 +127,15 @@ plan_mlit_census <-
   drake::drake_plan(
     df_station_code =
       # 鉄道駅コード
-      readxl::read_xlsx("data-raw/mlit_transport12/001179689.xlsx") %>%
+      readxl::read_xlsx("data-raw/mlit_transport12/001179689.xlsx",
+                        skip = 1,
+                        col_names = c("st_code",
+                                      "oc_name",
+                                      "rw_name",
+                                      "st_name",
+                                      "oc_code",
+                                      "rw_code")) %>%
       assertr::verify(dim(.) == c(2052, 6)) %>%
-      purrr::set_names(c("st_code",
-                         "oc_name",
-                         "rw_name",
-                         "st_name",
-                         "oc_code",
-                         "rw_code")) %>%
       filter(oc_name == "東日本旅客鉄道" & stringr::str_detect(rw_name, "新幹線$", negate = TRUE)) %>%
       select(st_code, rw_name, st_name, rw_code) %>%
       mutate(rw_name = stringr::str_remove(rw_name, "（.+）")) %>%
@@ -146,12 +148,13 @@ plan_mlit_census <-
     df_passenger =
       # 線別駅間移動人員
       readxl::read_xlsx("data-raw/mlit_transport12/001179095.xlsx",
-                        col_types = c("text", "text", "numeric", "text", "numeric", "numeric")) %>%
+                        col_types = c("text", "text", "numeric", "text", "numeric", "numeric"),
+                        skip = 1,
+                        col_names = c("rw_code",
+                                      "departure_st_code", "departure_status",
+                                      "arrive_st_code", "arrive_status",
+                                      "volume")) %>%
       assertr::verify(dim(.) == c(29963, 6)) %>%
-      purrr::set_names(c("rw_code",
-                         "departure_st_code", "departure_status",
-                         "arrive_st_code", "arrive_status",
-                         "volume")) %>%
       mutate(rw_code = stringr::str_pad(rw_code, width = 3, pad = "0"),
              across(ends_with("st_code"), ~stringr::str_pad(.x, width = 5, pad = "0"))) %>%
       # JR東日本の路線
@@ -260,7 +263,8 @@ plan_st_graph <-
                                     next_st_name),
              next_st_code := if_else(is.na(next_st_code) & st_name == "田町" & rw_name == "山手線",
                                      "01001",
-                                     str_pad(next_st_code, width = 5, pad = "0"))),
+                                     str_pad(next_st_code, width = 5, pad = "0"))) %>%
+      verify(nrow(.) == 502L),
     df_tgt_st_code002 =
       df_station_code %>%
       group_by(rw_name, rw_code) %>%
@@ -272,19 +276,21 @@ plan_st_graph <-
                                     next_st_name),
              next_st_code = if_else(is.na(next_st_code) & st_name == "田町" & rw_name == "山手線",
                                     "01029",
-                                    str_pad(next_st_code, width = 5, pad = "0"))),
+                                    str_pad(next_st_code, width = 5, pad = "0"))) %>%
+      verify(nrow(.) == nrow(df_tgt_st_code001)),
     df_passenger_all =
       df_passenger %>%
       make_passenger_od(df_station_code,
                                depart = departure_st_code,
                                arrive = arrive_st_code,
                                location = st_code,
-                        value = volume) %>%
+                        value = volume,
+                        .all = FALSE) %>%
       left_join(df_station_code %>%
                   select(arrive_st_code = st_code, next_st_name = st_name),
                 by = "arrive_st_code") %>%
       select(departure_st_code, arrive_st_code, st_name, next_st_name, volume) %>%
-      verify(dim(.) == c(6107, 5)),
+      verify(dim(.) == c(6040, 5)),
     df_st_graph =
       df_passenger_all %>%
       distinct(departure_st_code, arrive_st_code, .keep_all = TRUE) %>%
