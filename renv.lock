@@ -683,8 +683,8 @@
       "RemoteUsername": "uribo",
       "RemoteRepo": "ssrn",
       "RemoteRef": "master",
-      "RemoteSha": "66435b3b0459bda8e5262da1d71adb8cc1815af0",
-      "Hash": "1e25986134ca0d1aa54faeecfa633949"
+      "RemoteSha": "ee4347723b2579f3a4f014a930fcf2de7a64a860",
+      "Hash": "0274f1d756272cdda39717b8a1a680ad"
     },
     "storr": {
       "Package": "storr",
