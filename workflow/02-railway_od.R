@@ -119,8 +119,7 @@ plan_tokyo_mesh <-
       sf_kanto %>%
       dplyr::filter(nam == "Tokyo To") %>%
       sf::st_combine() %>%
-      sf::st_sf()
-  )
+      sf::st_sf())
 
 # ナンバリング、乗降客数 --------------------------------------------------------------------
 plan_mlit_census <-
@@ -159,8 +158,7 @@ plan_mlit_census <-
              across(ends_with("st_code"), ~stringr::str_pad(.x, width = 5, pad = "0"))) %>%
       # JR東日本の路線
       filter(rw_code %in% unique(df_station_code$rw_code)) %>%
-      assertr::verify(dim(.) == c(11623, 6))
-  )
+      assertr::verify(dim(.) == c(11623, 6)))
 
 # 鉄道のポイント -----------------------------------------------------------------
 plan_st_geometry <-
@@ -314,8 +312,7 @@ plan_st_graph <-
     routes_tidy =
       tidygraph::tbl_graph(nodes = node_list,
                            edges = edge_list,
-                           directed = FALSE)
-    )
+                           directed = FALSE))
 
 # 駅間の隣接行列と乗降者数の行列データ --------------------------------------------------------------------
 plan_adj_matrix <-
@@ -344,8 +341,7 @@ plan_adj_matrix <-
        },
     out_kanto_allpassenger_matrix_rds =
       kanto_jr_allpassernger_matrix %>%
-      readr::write_rds("data/kanto_jr_allpassenger_matrix.rds")
-  )
+      readr::write_rds("data/kanto_jr_allpassenger_matrix.rds"))
 
 plan_station_numbering <-
   drake::bind_plans(

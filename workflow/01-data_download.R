@@ -13,7 +13,7 @@ conflict_prefer("pluck", winner = "purrr")
 # 1/3 OD ----------------------------------------------------------------------
 if (!dir.exists(here("data-raw/mlit_transport12")))
   dir.create(here("data-raw/mlit_transport12"), recursive = TRUE)
-if (!all.equal(list.files(here("data-raw/mlit_transport12/")),
+if (!identical(list.files(here("data-raw/mlit_transport12/")),
               c("001179095.xlsx", "001179689.xlsx"))) {
   domain_url <- "https://www.mlit.go.jp"
   x <-
